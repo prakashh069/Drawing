@@ -10,6 +10,7 @@
             padding: 0;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             background: #f0f8ff;
@@ -19,19 +20,45 @@
             border-radius: 15px;
             background: #ffffff;
             box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        button, input[type="color"] {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+        input[type="range"] {
+            width: 100px;
         }
     </style>
 </head>
 <body>
+    <div class="controls">
+        <button id="clearBtn">Clear</button>
+        <input type="color" id="colorPicker" value="#4CAF50">
+        <input type="range" id="brushSize" min="1" max="20" value="5">
+    </div>
+
     <canvas id="drawingCanvas"></canvas>
 
     <script>
         const canvas = document.getElementById('drawingCanvas');
         const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearBtn');
+        const colorPicker = document.getElementById('colorPicker');
+        const brushSize = document.getElementById('brushSize');
 
         function resizeCanvas() {
             canvas.width = window.innerWidth * 0.9;
-            canvas.height = window.innerHeight * 0.9;
+            canvas.height = window.innerHeight * 0.8;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -59,8 +86,8 @@
             if (!drawing) return;
             const { x, y } = getPosition(event);
             ctx.lineTo(x, y);
-            ctx.strokeStyle = '#4CAF50';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineWidth = brushSize.value;
             ctx.lineCap = 'round';
             ctx.stroke();
         }
@@ -76,6 +103,10 @@
             const y = (event.clientY || event.touches[0].clientY) - rect.top;
             return { x, y };
         }
+
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
     </script>
 </body>
 </html>
