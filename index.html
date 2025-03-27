@@ -43,6 +43,8 @@
 <body>
     <div class="controls">
         <button id="clearBtn">Clear</button>
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
         <input type="color" id="colorPicker" value="#4CAF50">
         <input type="range" id="brushSize" min="1" max="20" value="5">
     </div>
@@ -53,8 +55,38 @@
         const canvas = document.getElementById('drawingCanvas');
         const ctx = canvas.getContext('2d');
         const clearBtn = document.getElementById('clearBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
         const colorPicker = document.getElementById('colorPicker');
         const brushSize = document.getElementById('brushSize');
+
+        let history = [];
+        let redoStack = [];
+
+        function saveState() {
+            history.push(canvas.toDataURL());
+            redoStack = [];
+        }
+
+        function undo() {
+            if (history.length > 1) {
+                redoStack.push(history.pop());
+                let img = new Image();
+                img.src = history[history.length - 1];
+                img.onload = () => ctx.drawImage(img, 0, 0);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                const img = new Image();
+                img.src = redoStack.pop();
+                img.onload = () => ctx.drawImage(img, 0, 0);
+                saveState();
+            }
+        }
 
         function resizeCanvas() {
             canvas.width = window.innerWidth * 0.9;
@@ -77,6 +109,7 @@
 
         function startDrawing(event) {
             drawing = true;
+            saveState();
             const { x, y } = getPosition(event);
             ctx.beginPath();
             ctx.moveTo(x, y);
@@ -106,7 +139,12 @@
 
         clearBtn.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            saveState();
         });
+
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
+        saveState();
     </script>
 </body>
 </html>
