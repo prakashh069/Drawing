@@ -19,8 +19,6 @@
             border-radius: 15px;
             background: #ffffff;
             box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            height: 90%;
         }
     </style>
 </head>
@@ -46,16 +44,21 @@
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
 
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
         function startDrawing(event) {
             drawing = true;
+            const { x, y } = getPosition(event);
             ctx.beginPath();
-            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.moveTo(x, y);
         }
 
         function draw(event) {
             if (!drawing) return;
-
-            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            const { x, y } = getPosition(event);
+            ctx.lineTo(x, y);
             ctx.strokeStyle = '#4CAF50';
             ctx.lineWidth = 5;
             ctx.lineCap = 'round';
@@ -65,6 +68,13 @@
         function stopDrawing() {
             drawing = false;
             ctx.closePath();
+        }
+
+        function getPosition(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX || event.touches[0].clientX) - rect.left;
+            const y = (event.clientY || event.touches[0].clientY) - rect.top;
+            return { x, y };
         }
     </script>
 </body>
